@@ -7,6 +7,9 @@ __version__ = '0.0.1'
 #     from setuptools.core import setup
 # except ImportError:
 #     from distutils.core import setup
+extra_setuptools_args = dict(
+    tests_require=['pytest']
+)
 
 setup(
     name='facesync',
