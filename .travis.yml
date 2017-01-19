@@ -1,13 +1,13 @@
-before_install:
-  - brew install ffmpeg
-  - brew install libav
-
 language: python
 
 sudo: false
 
 python:
   - "2.7"
+
+before_install:
+  brew install ffmpeg
+  brew install libav
 
 install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
