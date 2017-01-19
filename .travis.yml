@@ -1,6 +1,6 @@
 os:
   - linux
-  - osx
+  # - osx
 
 language: python
 
@@ -13,7 +13,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ffmpeg; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libav; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux"]]; then sudo apt-get install ffmpeg; fi
   # - brew install ffmpeg
   # - brew install libav
 
