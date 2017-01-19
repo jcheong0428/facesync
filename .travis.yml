@@ -1,10 +1,10 @@
 os:
   - linux
-  # - osx
+  - osx
 
 language: python
 
-sudo: true
+sudo: false
 
 python:
   - "2.7"
