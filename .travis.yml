@@ -4,6 +4,10 @@ sudo: false
 
 python:
   - "2.7"
+before_install:
+  - brew update
+  - brew install ffmpeg
+  - brew install libav
 
 install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -18,9 +22,6 @@ install:
   - pip install python-coveralls
   - pip install -r requirements.txt
   - python setup.py install
-  - brew update
-  - brew install ffmpeg
-  - brew install libav
 
 script: coverage run --source facesync -m py.test
 
