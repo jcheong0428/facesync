@@ -18,7 +18,9 @@ install:
   - pip install python-coveralls
   - pip install -r requirements.txt
   - python setup.py install
+  - brew update
   - brew install ffmpeg
+  - brew install libav
 
 script: coverage run --source facesync -m py.test
 
