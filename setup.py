@@ -1,0 +1,32 @@
+# from nltools.version import __version__
+from setuptools import setup, find_packages
+
+__version__ = '0.0.1'
+
+# try:
+#     from setuptools.core import setup
+# except ImportError:
+#     from distutils.core import setup
+
+setup(
+    name='facesync',
+    version=__version__,
+    author='Jin Hyun Cheong',
+    author_email='jcheong.gr@dartmouth.edu',
+    url='http://www.jinhyuncheong.com',
+    install_requires=['numpy', 'scipy'],
+    packages=find_packages(exclude=['facesync/tests']),
+    package_data={'facesync': ['resources/*']},
+    license='LICENSE.txt',
+    description='A Python package to sync videos based on audio',
+    long_description='facesync is a python package that allows users to synchronize multiple videos based on audio.',
+    keywords = ['psychology', 'preprocessing', 'video','audio'],
+    classifiers = [
+        "Programming Language :: Python",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License"
+    ],
+    **extra_setuptools_args
+)
+
