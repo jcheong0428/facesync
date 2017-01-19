@@ -6,4 +6,3 @@
 	re
 	subprocess
 	libav
-	ffmpeg
