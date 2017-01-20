@@ -1,6 +1,5 @@
 os:
-  - linux
-  # - osx
+  - osx
 
 language: python
 
@@ -13,8 +12,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ffmpeg; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libav; fi
-  # - brew install ffmpeg
-  # - brew install libav
 
 install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
