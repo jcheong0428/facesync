@@ -196,7 +196,8 @@ class facesync(object):
         assert(self.target_audio is not None), 'Target audio not specified'
         assert(self.audio_files is not None), 'Audio files not specified'
         self.offsets = []
-        rate0,data0 = wav.read(self.target_audio)
+        print os.getcwd()
+        rate0,data0 = wav.read(os.path.join(self.target_audio))
         for i, afile in enumerate(self.audio_files):
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate

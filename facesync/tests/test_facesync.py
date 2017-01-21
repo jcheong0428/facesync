@@ -1,4 +1,5 @@
 from facesync.facesync import facesync
+import os 
 
 def test_facesyc(tmpdir):
 	fs = facesync()
@@ -15,6 +16,7 @@ def test_facesyc(tmpdir):
 	fs = facesync(video_files=video_files,target_audio=target_audio)
 	fs.extract_audio()
 	assert(fs.audio_files == ['../resources/sample1.wav'])
+	print(os.getcwd())
 	fs.find_offset_fft()
 	assert(isinstance(fs.offsets,list))
 	
