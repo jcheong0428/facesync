@@ -11,7 +11,7 @@ def test_facesyc(tmpdir):
 	assert(isinstance(fs.offsets,list))
 
 	video_files = ['../resources/sample1.MP4']
-	target_audio = ['../resources/cosan_synctune.wav']
+	target_audio = '../resources/cosan_synctune.wav'
 	fs = facesync(video_files=video_files,target_audio=target_audio)
 	fs.extract_audio()
 	assert(fs.audio_files == ['../resources/sample1.wav'])
