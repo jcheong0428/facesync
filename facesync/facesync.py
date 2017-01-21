@@ -356,7 +356,7 @@ class facesync(object):
         resolution: height of the video
         suffix: what to name the resized video. If not specified, will append video names with resolution
         '''
-        if suffix = None: 
+        if suffix == None: 
             suffix = str(resolution)
 
         for vidfile in self.video_files: 
