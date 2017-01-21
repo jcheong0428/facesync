@@ -61,7 +61,7 @@ class facesync(object):
         This method extracts audio from video files in 'vidfiles'
         and then saves audio files in audfiles
         '''
-        assert(self.video_files is not None),'No video files to process'
+        assert(len(self.video_files)!=0),'No video files to process'
         rate = 44100
         self.audio_files = [] 
         for i, vidfile in enumerate(self.video_files):
@@ -318,3 +318,51 @@ class facesync(object):
                     pass
             offset_d = ts[np.where(min(ds)==ds)[0][0]] + search_start
             self.offsets.append(offset_r)
+
+    def concat_vids(self, final_vidname = None):
+        '''
+        This method concatenates multiple videos into one continuous video. 
+        final_vidname = Name to call concatenated video. If not specified will use the first video name appended with _all
+        '''
+        assert(len(self.video_files)!=0),'No video files to process'
+        if (len(video_files)!=0) and (final_vidname == None):
+            (path2fname, vname) = os.path.split(video_files[0])
+            self.final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_all.'+vname.split('.')[-1])
+        assert(type(final_vidname)==str),'final_vidname must be a string with full path'
+
+        # Create intermediate video files
+        tempfiles = str();
+        for i, vidfile in enumerate(self.video_files):
+            (path2fname, vname) = os.path.split(vidfile)
+            if len(tempfiles)!=0:
+                tempfiles = tempfiles+"|"
+            intermediatefile = os.path.join(path2fname,"intermediate"+str(i)+'.ts')
+            command = "ffmpeg -i "+ vidfile +" -c copy -bsf:v h264_mp4toannexb -f mpegts " + intermediatefile
+            subprocess.Popen(command, shell=True)
+            tempfiles = tempfiles + intermediatefile
+
+        # Concatenate videos
+        command = 'ffmpeg -i "concat:' + tempfiles + '" -c copy -bsf:a aac_adtstoasc '+ self.final_vidname
+        subprocess.Popen(command, shell=True)
+        #remove intermediates
+        for i, vidfile in enumerate(self.video_files):
+            (path2fname, vname) = os.path.split(vidfile)
+            intermediatefile = os.path.join(path2fname,"intermediate"+str(i)+'.ts')
+            command = "rm -f " + intermediatefile
+            subprocess.Popen(command, shell=True)
+
+    def resize_vids(self, resolution = 64, suffix = None):
+        '''
+        resolution: height of the video
+        suffix: what to name the resized video. If not specified, will append video names with resolution
+        '''
+        if suffix = None: 
+            suffix = str(resolution)
+
+        for vidfile in self.video_files: 
+            (path2fname, vname) = os.path.split(vidfile)
+            final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
+            command = 'ffmpeg -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
+            subprocess.Popen(command, shell=True)
+
+
