@@ -14,5 +14,5 @@ def test_facesyc(tmpdir):
 	target_audio = ['../resources/cosan_synctune.wav']
 	fs = facesync(video_files=video_files,target_audio=target_audio)
 	fs.extract_audio()
-
+	fs.audio_files = ['../resources/sample1.wav']
 	
