@@ -60,6 +60,8 @@ class facesync(object):
         '''
         This method extracts audio from video files in 'vidfiles'
         and then saves audio files in audfiles
+
+        Returns whether it was successful
         '''
         assert(len(self.video_files)!=0),'No video files to process'
         rate = 44100
@@ -72,7 +74,8 @@ class facesync(object):
             self.audio_files.append(outfile)
             # cmd = ' '.join(["avconv", "-i", infile, "-y", "-vn", "-ac", "1","-ar",str(rate),"-f", "wav", outfile])
             cmd = "ffmpeg -i " + infile + " -y -ab 128k -ac 2 -ar 44100 -vn " + outfile
-            subprocess.Popen(cmd,shell=True)
+            p = subprocess.Popen(cmd,shell=True)
+            return p
 
     def find_offset_fft(self,fft_bin_size=1024,overlap=0,box_height=512,box_width=43,samples_per_box=7,seconds_to_search = 60):
         '''
