@@ -11,12 +11,12 @@ def test_facesyc(tmpdir):
 	assert(isinstance(fs.video_files,list))
 	assert(isinstance(fs.offsets,list))
 	cwd = os.getcwd()
-	video_files = [os.path.join(cwd,'resources/sample1.MP4')]
-	target_audio = os.path.join(cwd,'resources/cosan_synctune.wav')
+	video_files = [os.path.join(cwd,'facesync/resources/sample1.MP4')]
+	target_audio = os.path.join(cwd,'facesync/resources/cosan_synctune.wav')
 	fs = facesync(video_files=video_files,target_audio=target_audio)
 	fs.extract_audio()
 	print(glob.glob(os.path.join(str(cwd.join('*')))))
-	assert(fs.audio_files == [os.path.join(cwd,'resources/sample1.wav')])
+	assert(fs.audio_files == [os.path.join(cwd,'facesync/resources/sample1.wav')])
 	fs.find_offset_fft()
 	assert(isinstance(fs.offsets,list))
 	
