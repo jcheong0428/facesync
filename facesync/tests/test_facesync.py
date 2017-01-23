@@ -16,6 +16,8 @@ def test_facesyc(tmpdir):
 	fs = facesync(video_files=video_files,target_audio=target_audio)
 	fs.extract_audio()
 	print(glob.glob(os.path.join(str(cwd.join('*')))))
+	print(glob.glob(os.path.join(str(cwd.join('facesync/*')))))
+	print(glob.glob(os.path.join(str(cwd.join('facesync/resources/*')))))
 	assert(fs.audio_files == [os.path.join(cwd,'facesync/resources/sample1.wav')])
 	fs.find_offset_fft()
 	assert(isinstance(fs.offsets,list))
