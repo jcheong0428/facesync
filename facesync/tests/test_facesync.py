@@ -20,4 +20,5 @@ def test_facesyc(tmpdir):
 	assert(fs.audio_files == [os.path.join(os.path.dirname(__file__), 'resources','sample1.wav')])
 	fs.find_offset_fft()
 	assert(isinstance(fs.offsets,list))
-	
+	fs.find_offset_corr(search_start=14,search_end=16)
+	fs.find_offset_dist(search_start=14,search_end=16)
