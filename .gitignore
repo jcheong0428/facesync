@@ -22,3 +22,10 @@ Thumbs.db
 ######################
 .coverage
 htmlcov/
+
+# Build files
+#############
+.cache/
+build/
+dist/
+facesync.egg-info/
