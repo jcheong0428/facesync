@@ -321,7 +321,7 @@ class facesync(object):
                 except:
                     pass
             offset_d = ts[np.where(min(ds)==ds)[0][0]] + search_start
-            self.offsets.append(offset_r)
+            self.offsets.append(offset_d)
 
     def concat_vids(self, final_vidname = None):
         '''
