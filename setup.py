@@ -17,7 +17,7 @@ setup(
     author='Jin Hyun Cheong',
     author_email='jcheong.gr@dartmouth.edu',
     url='https://github.com/jcheong0428/facesync',
-    download_url = '',
+    download_url = 'https://github.com/jcheong0428/facesync/tarball/0.1',
     install_requires=['numpy', 'scipy'],
     packages=find_packages(exclude=['facesync/tests']),
     package_data={'facesync': ['resources/*']},
