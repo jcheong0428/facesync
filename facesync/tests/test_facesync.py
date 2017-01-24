@@ -22,5 +22,6 @@ def test_facesyc(tmpdir):
 	assert(isinstance(fs.offsets,list))
 	fs.find_offset_corr(search_start=14,search_end=16)
 	fs.find_offset_dist(search_start=14,search_end=16)
-
 	fs.resize_vids(resolution = 32,suffix = 'test')
+
+	# add tests for video concat
