@@ -369,4 +369,21 @@ class facesync(object):
             command = 'ffmpeg -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
             subprocess.Popen(command, shell=True)
 
+    def trim_vids(self,offset = None, suffix = None):
+        '''
+        Trims video based on offset
+        '''
+        if suffix == None: 
+            suffix = 'trimmed'
+        if offset is None:
+            offset = fs.offsets
+        for i,vidfile enumerate(self.video_files):
+            seconds = fs.offsets[i]
+            (path2fname, vname) = os.path.split(vidfile)
+            final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
+            command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
+            subprocess.Popen(command, shell=True)
+
+
+
 
