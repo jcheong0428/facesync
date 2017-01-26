@@ -244,6 +244,7 @@ class facesync(object):
         assert(self.target_audio is not None), 'Target audio not specified'
         assert(self.audio_files is not None), 'Audio files not specified'
         self.offsets = []
+        allrs = []
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             rate1,data1 = wav.read(afile)
@@ -271,8 +272,10 @@ class facesync(object):
                     ts.append(i)
                 except:
                     pass
-            offset_r = ts[np.where(max(rs)==rs)[0][0]] + search_start
+            allrs.append(rs)
+            offset_r = ts[np.argmax(rs)] + search_start
             self.offsets.append(offset_r)
+        return allrs
 
     def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120):
         '''
@@ -293,6 +296,7 @@ class facesync(object):
         assert(self.target_audio is not None), 'Target audio not specified'
         assert(self.audio_files is not None), 'Audio files not specified'
         self.offsets = []
+        allds = []
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             rate1,data1 = wav.read(afile)
@@ -320,8 +324,10 @@ class facesync(object):
                     ts.append(i)
                 except:
                     pass
-            offset_d = ts[np.where(min(ds)==ds)[0][0]] + search_start
+            allds.append(ds)
+            offset_d = ts[np.argmin(ds)] + search_start
             self.offsets.append(offset_d)
+        return allds
 
     def concat_vids(self, final_vidname = None):
         '''
