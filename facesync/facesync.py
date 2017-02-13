@@ -348,7 +348,7 @@ class facesync(object):
         '''
         assert(len(self.video_files)!=0),'No video files to process'
         if (len(self.video_files)!=0) and (final_vidname == None):
-            (path2fname, vname) = os.path.split(video_files[0])
+            (path2fname, vname) = os.path.split(self.video_files[0])
             self.final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_all.'+vname.split('.')[-1])
         assert(type(final_vidname)==str),'final_vidname must be a string with full path'
 
