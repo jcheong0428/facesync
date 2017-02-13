@@ -347,7 +347,7 @@ class facesync(object):
         final_vidname = Name to call concatenated video. If not specified will use the first video name appended with _all
         '''
         assert(len(self.video_files)!=0),'No video files to process'
-        if (len(video_files)!=0) and (final_vidname == None):
+        if (len(self.video_files)!=0) and (final_vidname == None):
             (path2fname, vname) = os.path.split(video_files[0])
             self.final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_all.'+vname.split('.')[-1])
         assert(type(final_vidname)==str),'final_vidname must be a string with full path'
