@@ -16,6 +16,13 @@ import subprocess
 import scipy.io.wavfile as wav
 import math
 
+def write_offset_to_file(afile, offset_r, header):
+    fname = afile.split(".")[0] + '.txt'
+    f = open(fname, 'w')
+    f.write(header+'\n')
+    f.write(str(offset_r)) 
+    f.close()
+
 class facesync(object):
     """
     facesync is a class to represents multiple videos
@@ -223,6 +230,7 @@ class facesync(object):
             samples_per_sec = float(rate0) / float(fft_bin_size)
             seconds= round(float(delay) / float(samples_per_sec), 4)
             self.offsets.append(seconds)
+            write_offset_to_file(afile, seconds,header='fft')
 
     def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=120):
         '''
@@ -275,6 +283,7 @@ class facesync(object):
             allrs.append(rs)
             offset_r = ts[np.argmax(rs)] + search_start
             self.offsets.append(offset_r)
+            write_offset_to_file(afile, offset_r,header='corr')
         return allrs
 
     def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120):
@@ -327,6 +336,7 @@ class facesync(object):
             allds.append(ds)
             offset_d = ts[np.argmin(ds)] + search_start
             self.offsets.append(offset_d)
+            write_offset_to_file(afile, offset_d,header='dist')
         return allds
 
     def concat_vids(self, final_vidname = None):
