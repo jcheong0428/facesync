@@ -281,7 +281,8 @@ class facesync(object):
                 except:
                     pass
             allrs.append(rs)
-            offset_r = ts[np.argmax(rs)] + search_start
+            # offset_r = ts[np.argmax(rs)] + search_start
+            offset_r = ts[np.argmax(rs)]
             self.offsets.append(offset_r)
             write_offset_to_file(afile, offset_r,header='corr')
         return allrs
@@ -334,7 +335,8 @@ class facesync(object):
                 except:
                     pass
             allds.append(ds)
-            offset_d = ts[np.argmin(ds)] + search_start
+            # offset_d = ts[np.argmin(ds)] + search_start
+            offset_d = ts[np.argmin(ds)]
             self.offsets.append(offset_d)
             write_offset_to_file(afile, offset_d,header='dist')
         return allds
