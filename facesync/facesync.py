@@ -269,7 +269,8 @@ class facesync(object):
                 print "Original length need to be shorter or reduce searchtime to allow buffer at end."
             rs = []
             ts = []
-            for i in np.linspace(0,searchtime,fps*searchtime):
+            # for i in np.linspace(0,searchtime,fps*searchtime):
+            for i in np.linspace(search_start,search_end,fps*searchtime):
                 sample = data1[int(rate0*i):int(rate0*(i+length))][0:to_compare.shape[0]]
                 try:
                     assert(to_compare.shape[0]==sample.shape[0])
@@ -323,7 +324,8 @@ class facesync(object):
                 print "Original length need to be shorter or reduce searchtime to allow buffer at end."
             ds = []
             ts = []
-            for i in np.linspace(0,searchtime,fps*searchtime):
+            # for i in np.linspace(0,searchtime,fps*searchtime):
+            for i in np.linspace(search_start,search_end,fps*searchtime):
                 sample = data1[int(rate0*i):int(rate0*(i+length))][0:to_compare.shape[0]]
                 try:
                     assert(to_compare.shape[0]==sample.shape[0])
@@ -347,6 +349,8 @@ class facesync(object):
         final_vidname = Name to call concatenated video. If not specified will use the first video name appended with _all
         '''
         assert(len(self.video_files)!=0),'No video files to process'
+        if (final_vidname != None):
+            self.final_vidname = final_vidname
         if (len(self.video_files)!=0) and (final_vidname == None):
             (path2fname, vname) = os.path.split(self.video_files[0])
             self.final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_all.'+vname.split('.')[-1])
@@ -359,13 +363,14 @@ class facesync(object):
             if len(tempfiles)!=0:
                 tempfiles = tempfiles+"|"
             intermediatefile = os.path.join(path2fname,"intermediate"+str(i)+'.ts')
-            command = "ffmpeg -i "+ vidfile +" -c copy -bsf:v h264_mp4toannexb -f mpegts " + intermediatefile
-            subprocess.Popen(command, shell=True)
+            if not os.path.exists(intermediatefile):
+                command = "ffmpeg -i "+ vidfile +" -c copy -bsf:v h264_mp4toannexb -f mpegts " + intermediatefile
+                subprocess.call(command, shell=True)
             tempfiles = tempfiles + intermediatefile
 
         # Concatenate videos
         command = 'ffmpeg -i "concat:' + tempfiles + '" -c copy -bsf:a aac_adtstoasc '+ self.final_vidname
-        subprocess.Popen(command, shell=True)
+        subprocess.call(command, shell=True)
         #remove intermediates
         for i, vidfile in enumerate(self.video_files):
             (path2fname, vname) = os.path.split(vidfile)
@@ -385,7 +390,8 @@ class facesync(object):
             (path2fname, vname) = os.path.split(vidfile)
             final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
             command = 'ffmpeg -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
-            subprocess.Popen(command, shell=True)
+            if not os.path.exists(final_vidname):
+                subprocess.Popen(command, shell=True)
 
     def trim_vids(self,offsets = None, suffix = None):
         '''
