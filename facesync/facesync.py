@@ -288,6 +288,70 @@ class facesync(object):
             write_offset_to_file(afile, offset_r,header='corr')
         return allrs
 
+    def find_offset_corr_sparse(self,length=5,search_start=0,search_end=20,fps=120,sparse_ratio=.5):
+        '''
+        Input
+        ------------
+        self.target_audio : Original audio to which other files will be aligned to
+        self.audio_files : List of audio files that needs to be trimmed
+        length : length of original sample to compare
+        search_start, search_end: start and end times to search for alignment in seconds
+        fps: level of temporal precision
+        
+        Output
+        ------------
+        offset_r : time to trim based on correlation
+        offset_d : time to trim based on distance
+        rs: correlation values
+        ds: difference values
+        '''
+        assert(self.target_audio is not None), 'Target audio not specified'
+        assert(self.audio_files is not None), 'Audio files not specified'
+        self.offsets = []
+        allrs = []
+        rate0,data0 = wav.read(self.target_audio)
+        for i, afile in enumerate(self.audio_files):
+            rate1,data1 = wav.read(afile)
+            assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
+            searchtime = search_end-search_start # seconds to search alignment
+            if np.ndim(data0)>1:
+                data0 = data0[:,0]
+            if np.ndim(data1)>1:
+                data1 = data1[:,0]
+            # to_compare = data0[0:rate0*length]
+            sampleix = range(0,int(rate0*length)-1)
+            np.random.shuffle(sampleix)
+            sampleix = np.sort(sampleix[0:int(rate0*length*sparse_ratio)])
+            to_compare = data0[sampleix]
+
+            try:
+                assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
+            except:
+                print "Original length need to be shorter or reduce searchtime to allow buffer at end."
+            rs = []
+            ts = []
+            # for i in np.linspace(0,searchtime,fps*searchtime):
+            for i in np.linspace(search_start,search_end,fps*searchtime):
+                # sample = data1[int(rate0*i):int(rate0*(i+length))][0:to_compare.shape[0]]
+                sample = data1[int(rate0*i):int(rate0*(i+length))][sampleix]
+                try:
+                    assert(to_compare.shape[0]==sample.shape[0])
+                except:
+                    print("Shape mismatch at %s" %str(i))
+                try:
+                    rs.append(np.corrcoef(to_compare,sample)[0][1])
+                    ts.append(i)
+                except:
+                    pass
+            allrs.append(rs)
+            # offset_r = ts[np.argmax(rs)] + search_start
+            offset_r = ts[np.argmax(rs)]
+            self.offsets.append(offset_r)
+            write_offset_to_file(afile, offset_r,header='corr')
+        return allrs
+
+
+
     def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120):
         '''
         Input
