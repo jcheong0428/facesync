@@ -23,6 +23,35 @@ def write_offset_to_file(afile, offset_r, header):
     f.write(str(offset_r)) 
     f.close()
 
+def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
+    if verbose:
+        print afile
+    rate1,data1 = wav.read(afile)
+    assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
+    searchtime = search_end-search_start # seconds to search alignment
+    if np.ndim(data0)>1:
+        data0 = data0[:,0]
+    if np.ndim(data1)>1:
+        data1 = data1[:,0]
+    to_compare = data0[0:rate0*length]
+    try:
+        assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
+    except:
+        print "Original length need to be shorter or reduce searchtime to allow buffer at end."
+    rs = []
+    ts = []
+    # for i in np.linspace(0,searchtime,fps*searchtime):
+    inputs = list(np.linspace(search_start,search_end,fps*searchtime))
+    
+    ts = inputs
+    allrs.append(rs)
+    # offset_r = ts[np.argmax(rs)] + search_start
+    offset_r = ts[np.argmax(rs)]
+    self.offsets.append(offset_r)
+    write_offset_to_file(afile, offset_r,header='corr_multi')
+    return rs,offset_r
+
+
 class facesync(object):
     """
     facesync is a class to represents multiple videos
@@ -287,7 +316,7 @@ class facesync(object):
             # offset_r = ts[np.argmax(rs)] + search_start
             offset_r = ts[np.argmax(rs)]
             self.offsets.append(offset_r)
-            write_offset_to_file(afile, offset_r,header='corr')
+            write_offset_to_file(afile, offset_r,header='corr_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allrs
 
     def find_offset_corr_sparse(self,length=5,search_start=0,search_end=20,fps=120,sparse_ratio=.5,verbose=True):
@@ -351,7 +380,7 @@ class facesync(object):
             # offset_r = ts[np.argmax(rs)] + search_start
             offset_r = ts[np.argmax(rs)]
             self.offsets.append(offset_r)
-            write_offset_to_file(afile, offset_r,header='corr_sparse')
+            write_offset_to_file(afile, offset_r,header='corr_sparse_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allrs
 
     def find_offset_corr_multi(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
@@ -371,55 +400,20 @@ class facesync(object):
         rs: correlation values
         ds: difference values
         '''
-        try:
-            from joblib import Parallel, delayed
-            import multiprocessing
-            num_cores = multiprocessing.cpu_count()
-        except:
-            print("Failed to import joblib and multiprocessing")
-
-        def processInput(i):
-            sample = data1[int(rate0*i):int(rate0*(i+length))][0:to_compare.shape[0]]
-                try:
-                    assert(to_compare.shape[0]==sample.shape[0])
-                    r =  np.corrcoef(to_compare,sample)[0][1]
-                except:
-                    print("Shape mismatch at %s" %str(i))
-            return r
-
+        from joblib import Parallel, delayed
+        import multiprocessing
+        num_cores = multiprocessing.cpu_count()
 
         assert(self.target_audio is not None), 'Target audio not specified'
         assert(self.audio_files is not None), 'Audio files not specified'
         self.offsets = []
         allrs = []
         rate0,data0 = wav.read(self.target_audio)
-        for i, afile in enumerate(self.audio_files):
-            if verbose:
-                print afile
-            rate1,data1 = wav.read(afile)
-            assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
-            searchtime = search_end-search_start # seconds to search alignment
-            if np.ndim(data0)>1:
-                data0 = data0[:,0]
-            if np.ndim(data1)>1:
-                data1 = data1[:,0]
-            to_compare = data0[0:rate0*length]
-            try:
-                assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
-            except:
-                print "Original length need to be shorter or reduce searchtime to allow buffer at end."
-            rs = []
-            ts = []
-            # for i in np.linspace(0,searchtime,fps*searchtime):
-            inputs = np.linspace(search_start,search_end,fps*searchtime)
-            rs = Parallel(n_jobs=num_cores)(delayed(processInput)(i) for i in inputs)
-            ts = inputs
-            allrs.append(rs)
-            # offset_r = ts[np.argmax(rs)] + search_start
-            offset_r = ts[np.argmax(rs)]
-            self.offsets.append(offset_r)
-            write_offset_to_file(afile, offset_r,header='corr_multi')
-        return allrs
+
+        #parallelize audiofiles
+        results = Parallel(n_jobs=num_cores)(delayed(processInput)(rate0,data0,afile,fps,search_start,search_end,verbose) for afile in self.audio_files)
+
+        return results
 
 
     def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120):
@@ -474,7 +468,7 @@ class facesync(object):
             # offset_d = ts[np.argmin(ds)] + search_start
             offset_d = ts[np.argmin(ds)]
             self.offsets.append(offset_d)
-            write_offset_to_file(afile, offset_d,header='dist')
+            write_offset_to_file(afile, offset_d,header='dist_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allds
 
     def concat_vids(self, final_vidname = None):
