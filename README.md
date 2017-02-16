@@ -32,7 +32,12 @@ also requires following packages:
 - scipy 
 You may also install these via `pip install -r requirements.txt`
 
-## Example 
+## Recommended Processing Steps 
+1. Extract Audio from Target Video 
+2. Find offset with Extracted Audio 
+3. Trim Video using Offset. 
+*If you need to resize your video, do so before trimming.
+Otherwise timing can be off. 
 
 ```
 from facesync.facesync import facesync
