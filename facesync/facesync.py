@@ -294,7 +294,7 @@ class facesync(object):
             crosscorr = fftshift(np.real(ifft(f1*f2)))
             assert(len(crosscorr)==len(x))
             zero_index = int(len(x) / 2 ) -1 
-            offset_x = zero_index - np.argmax(crosscorr)
+            offset_x = (zero_index - np.argmax(crosscorr))/float(rate0)
             self.offsets.append(offset_x)
             write_offset_to_file(afile, offset_x,header='xcorr_len'+str(length))
 
