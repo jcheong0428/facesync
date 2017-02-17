@@ -261,7 +261,7 @@ class facesync(object):
             self.offsets.append(seconds)
             write_offset_to_file(afile, seconds,header='fft')
 
-    def find_offset_cross(self,length = 10):
+    def find_offset_cross(self,length = 10,verbose=True):
         '''
         length: seconds to use for the cross correlation matching, default is 10 seconds
         '''
