@@ -277,7 +277,6 @@ class facesync(object):
                 print afile
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
-            searchtime = search_end-search_start # seconds to search alignment
             # Take first audio channel 
             if np.ndim(data0)>1:
                 data0 = data0[:,0]
@@ -295,10 +294,9 @@ class facesync(object):
             crosscorr = fftshift(np.real(ifft(f1*f2)))
             assert(len(crosscorr)==len(x))
             zero_index = int(len(x) / 2 ) -1 
-            offset = zero_index - np.argmax(c)
-            self.offsets.append(offset)
-            self.offsets.append(offset_r)
-            write_offset_to_file(afile, offset_r,header='xcorr_len'+str(length))
+            offset_x = zero_index - np.argmax(c)
+            self.offsets.append(offset_x)
+            write_offset_to_file(afile, offset_x,header='xcorr_len'+str(length))
 
 
     def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
