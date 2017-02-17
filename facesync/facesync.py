@@ -261,6 +261,46 @@ class facesync(object):
             self.offsets.append(seconds)
             write_offset_to_file(afile, seconds,header='fft')
 
+    def find_offset_cross(self,length = 10):
+        '''
+        length: seconds to use for the cross correlation matching, default is 10 seconds
+        '''
+        import numpy as np
+        from numpy.fft import fft, ifft, fft2, ifft2, fftshift
+        assert(self.target_audio is not None), 'Target audio not specified'
+        assert(self.audio_files is not None), 'Audio files not specified'
+        self.offsets = []
+        allrs = []
+        rate0,data0 = wav.read(self.target_audio)
+        for i, afile in enumerate(self.audio_files):
+            if verbose:
+                print afile
+            rate1,data1 = wav.read(afile)
+            assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
+            searchtime = search_end-search_start # seconds to search alignment
+            # Take first audio channel 
+            if np.ndim(data0)>1:
+                data0 = data0[:,0]
+            if np.ndim(data1)>1:
+                data1 = data1[:,0]
+            x = data0[:rate0*length]
+            y = data1[:rate0*length]
+            if len(x) < len(y):
+                xnew = np.zeros_like(y)
+                xnew[:len(x)] = x
+                x = xnew
+            assert(len(x)==len(y)), "Length of two samples must be the same"
+            f1 = fft(x)
+            f2 = fft(np.flipud(y))
+            crosscorr = fftshift(np.real(ifft(f1*f2)))
+            assert(len(crosscorr)==len(x))
+            zero_index = int(len(x) / 2 ) -1 
+            offset = zero_index - np.argmax(c)
+            self.offsets.append(offset)
+            self.offsets.append(offset_r)
+            write_offset_to_file(afile, offset_r,header='xcorr_len'+str(length))
+
+
     def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
         '''
         Input
