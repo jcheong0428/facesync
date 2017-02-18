@@ -18,7 +18,7 @@ import math
 
 def write_offset_to_file(afile, offset_r, header):
     fname = afile.split(".")[0] + '.txt'
-    f = open(fname, 'w')
+    f = open(fname, 'a+')
     f.write(header+'\n')
     f.write(str(offset_r)) 
     f.close()
@@ -366,6 +366,7 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision
+        sparse_ratio = Determines the sparse sampling of the target audio to match (default is .5)
         
         Output
         ------------
@@ -452,7 +453,6 @@ class facesync(object):
         results = Parallel(n_jobs=num_cores)(delayed(processInput)(rate0,data0,afile,fps,search_start,search_end,verbose) for afile in self.audio_files)
 
         return results
-
 
     def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120):
         '''
