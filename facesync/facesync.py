@@ -20,7 +20,7 @@ def write_offset_to_file(afile, offset_r, header):
     fname = afile.split(".")[0] + '.txt'
     f = open(fname, 'a+')
     f.write(header+'\n')
-    f.write(str(offset_r)) 
+    f.write(str(offset_r)+'\n') 
     f.close()
 
 def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
@@ -568,10 +568,12 @@ class facesync(object):
         if offsets is None:
             offsets = self.offsets
         for i,vidfile in enumerate(self.video_files):
-            seconds = offsets[i]
+            seconds = str(offsets[i])
             (path2fname, vname) = os.path.split(vidfile)
             final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
-            command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
+            # command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
+            # command = 'ffmpeg -y -ss ' + seconds.split('.')[0] + ' -i ' + vidfile + ' -ss 00:00:00.' + seconds.split('.')[1] + ' -c copy ' + final_vidname
+            command = 'ffmpeg -y -i ' + vidfile + ' -ss ' + str(seconds) + ' -crf 23 '  + final_vidname
             subprocess.Popen(command, shell=True)
 
 
