@@ -16,14 +16,20 @@ import subprocess
 import scipy.io.wavfile as wav
 import math
 
-def write_offset_to_file(afile, offset_r, header):
+def write_offset_to_file(afile, offset, header):
+    '''
+    Helper function to write offset output to file.
+    '''
     fname = afile.split(".")[0] + '.txt'
     f = open(fname, 'a+')
     f.write(header+'\n')
-    f.write(str(offset_r)+'\n') 
+    f.write(str(offset)+'\n') 
     f.close()
 
 def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
+    '''
+    Helper function for multiprocessing
+    '''
     if verbose:
         print afile
     rate1,data1 = wav.read(afile)
@@ -87,16 +93,21 @@ class facesync(object):
         if (self.video_files is not None) & (self.offsets is not None):
             assert(len(self.video_files)==len(self.offsets)),'Number of videos and number of offsets should match'
 
-    def extract_audio(self,rate=44100,call=True):
+    def extract_audio(self,rate=44100,call=True,verbose=True):
         '''
-        This method extracts audio from video files in 'vidfiles'
-        and then saves audio files in audfiles
-
-        Returns whether it was successful
+        This method extracts audio from video files in self.video_files and saves audio files in self.audio_files
+        
+        Input
+        ------------
+        rate: rate of audio stream frequency to be extracted, default 44100
+        call: boolean, whether to wait for each process to finish or open multiple threads
+        verbose: if True, prints the currently processing audio filename 
         '''
         assert(len(self.video_files)!=0),'No video files to process'
         self.audio_files = [] 
         for i, vidfile in enumerate(self.video_files):
+            if verbose:
+                print vidfile
             (path2fname, vname) = os.path.split(vidfile)
             aname = vname.split(".")[0] + ".wav"
             infile = os.path.join(path2fname,vname)
@@ -110,8 +121,13 @@ class facesync(object):
                 subprocess.Popen(command, shell=True)
 
     def find_offset_cross(self,length = 10,verbose=True):
-        '''
+        ''' 
+        Find offset using Fourier Transform cross correlation.
+
+        Input
+        ------------
         length: seconds to use for the cross correlation matching, default is 10 seconds
+        verbose: if True, prints the currently processing audio filename 
         '''
         import numpy as np
         from numpy.fft import fft, ifft, fft2, ifft2, fftshift
@@ -149,6 +165,8 @@ class facesync(object):
 
     def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
         '''
+        Find offset based on correlation of two audio.
+
         Input
         ------------
         self.target_audio : Original audio to which other files will be aligned to
@@ -156,7 +174,8 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision
-        
+        verbose: if True, prints the currently processing audio filename 
+
         Output
         ------------
         offset_r : time to trim based on correlation
@@ -207,6 +226,8 @@ class facesync(object):
 
     def find_offset_corr_sparse(self,length=5,search_start=0,search_end=20,fps=120,sparse_ratio=.5,verbose=True):
         '''
+        Finds offset by correlation with sparse sampling.
+
         Input
         ------------
         self.target_audio : Original audio to which other files will be aligned to
@@ -215,7 +236,8 @@ class facesync(object):
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision
         sparse_ratio = Determines the sparse sampling of the target audio to match (default is .5)
-        
+        verbose: if True, prints the currently processing audio filename 
+
         Output
         ------------
         offset_r : time to trim based on correlation
@@ -272,6 +294,9 @@ class facesync(object):
 
     def find_offset_corr_multi(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
         '''
+        Find offset based on correlation with multiprocessing.
+        Requires joblib package.
+
         Input
         ------------
         self.target_audio : Original audio to which other files will be aligned to
@@ -279,7 +304,8 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision
-        
+        verbose: if True, prints the currently processing audio filename 
+
         Output
         ------------
         offset_r : time to trim based on correlation
@@ -302,8 +328,10 @@ class facesync(object):
 
         return results
 
-    def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120):
+    def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
         '''
+        Find offset based on squared distance of audio wave.
+
         Input
         ------------
         self.target_audio : Original audio to which other files will be aligned to
@@ -311,7 +339,8 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision
-        
+        verbose: if True, prints the currently processing audio filename 
+
         Output
         ------------
         offset_d : time to trim based on distance
@@ -324,6 +353,8 @@ class facesync(object):
         allds = []
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
+            if verbose:
+                print afile
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
             searchtime = search_end-search_start # seconds to search alignment
@@ -359,8 +390,11 @@ class facesync(object):
 
     def concat_vids(self, final_vidname = None):
         '''
-        This method concatenates multiple videos into one continuous video. 
-        final_vidname = Name to call concatenated video. If not specified will use the first video name appended with _all
+        Concatenate list of videos to one video. 
+
+        Inputs
+        ------------
+        final_vidname = Filepath/filname of the concatenated video. If not specified will use the first video name appended with _all
         '''
         assert(len(self.video_files)!=0),'No video files to process'
         if (final_vidname != None):
@@ -383,7 +417,7 @@ class facesync(object):
             tempfiles = tempfiles + intermediatefile
 
         # Concatenate videos
-        command = 'ffmpeg -i "concat:' + tempfiles + '" -c copy -bsf:a aac_adtstoasc '+ self.final_vidname
+        command = 'ffmpeg -y -i "concat:' + tempfiles + '" -c copy -bsf:a aac_adtstoasc '+ self.final_vidname
         subprocess.call(command, shell=True)
         #remove intermediates
         for i, vidfile in enumerate(self.video_files):
@@ -394,8 +428,14 @@ class facesync(object):
 
     def resize_vids(self, resolution = 64, suffix = None,call = True):
         '''
+        Resize videos.
+
+        Inputs
+        ------------
         resolution: height of the video
         suffix: what to name the resized video. If not specified, will append video names with resolution
+        call: boolean, whether to wait for each process to finish or open multiple threads, 
+        True: call, False: multithread, default is call
         '''
         if suffix == None: 
             suffix = str(resolution)
@@ -403,7 +443,7 @@ class facesync(object):
         for vidfile in self.video_files: 
             (path2fname, vname) = os.path.split(vidfile)
             final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
-            command = 'ffmpeg -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
+            command = 'ffmpeg -y -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
             if not os.path.exists(final_vidname):
                 if call:
                     subprocess.call(command, shell=True)
@@ -413,13 +453,22 @@ class facesync(object):
     def trim_vids(self,offsets = None, suffix = None,call=True):
         '''
         Trims video based on offset
+        
+        Inputs
+        ------------
+        offsets: list of offsets to trim the self.video_files with
+        length of offsets should match length of self.video_files
+        suffix: string to add to end of the trimmed video, default: 'trimmed'
+        call: boolean, whether to wait for each process to finish or open multiple threads, 
+        True: call, False: multithread, default is call
         '''
         if suffix == None: 
             suffix = 'trimmed'
-        if offsets is None:
-            offsets = self.offsets
+        if offsets is not None:
+            self.offsets= offsets
+        assert(len(self.video_files)==len(self.offsets)),'Number of videos and number of offsets should match'
         for i,vidfile in enumerate(self.video_files):
-            seconds = str(offsets[i])
+            seconds = str(self.offsets[i])
             (path2fname, vname) = os.path.split(vidfile)
             final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
             # command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
