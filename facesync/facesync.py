@@ -163,7 +163,7 @@ class facesync(object):
             write_offset_to_file(afile, offset_x,header='xcorr_len'+str(length))
 
 
-    def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
+    def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=44100,verbose=True):
         '''
         Find offset based on correlation of two audio.
 
@@ -173,7 +173,7 @@ class facesync(object):
         self.audio_files : List of audio files that needs to be trimmed
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
-        fps: level of temporal precision
+        fps: level of temporal precision, default 44100
         verbose: if True, prints the currently processing audio filename 
 
         Output
@@ -224,7 +224,7 @@ class facesync(object):
             write_offset_to_file(afile, offset_r,header='corr_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allrs
 
-    def find_offset_corr_sparse(self,length=5,search_start=0,search_end=20,fps=120,sparse_ratio=.5,verbose=True):
+    def find_offset_corr_sparse(self,length=5,search_start=0,search_end=20,fps=44100,sparse_ratio=.5,verbose=True):
         '''
         Finds offset by correlation with sparse sampling.
 
@@ -234,7 +234,7 @@ class facesync(object):
         self.audio_files : List of audio files that needs to be trimmed
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
-        fps: level of temporal precision
+        fps: level of temporal precision, default 44100
         sparse_ratio = Determines the sparse sampling of the target audio to match (default is .5)
         verbose: if True, prints the currently processing audio filename 
 
@@ -292,7 +292,7 @@ class facesync(object):
             write_offset_to_file(afile, offset_r,header='corr_sparse_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allrs
 
-    def find_offset_corr_multi(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
+    def find_offset_corr_multi(self,length=5,search_start=0,search_end=20,fps=44100,verbose=True):
         '''
         Find offset based on correlation with multiprocessing.
         Requires joblib package.
@@ -303,7 +303,7 @@ class facesync(object):
         self.audio_files : List of audio files that needs to be trimmed
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
-        fps: level of temporal precision
+        fps: level of temporal precision, default 44100
         verbose: if True, prints the currently processing audio filename 
 
         Output
@@ -328,7 +328,7 @@ class facesync(object):
 
         return results
 
-    def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=120,verbose=True):
+    def find_offset_dist(self,length=5,search_start=0,search_end=20,fps=44100,verbose=True):
         '''
         Find offset based on squared distance of audio wave.
 
@@ -338,7 +338,7 @@ class facesync(object):
         self.audio_files : List of audio files that needs to be trimmed
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
-        fps: level of temporal precision
+        fps: level of temporal precision, default 44100
         verbose: if True, prints the currently processing audio filename 
 
         Output
