@@ -3,13 +3,10 @@ import os, glob
 
 def test_facesyc(tmpdir):
 	fs = facesync()
-	assert(len(fs.audio_files)==0)
-	assert(len(fs.video_files)==0)
-	assert(len(fs.offsets)==0)
+	assert(fs.audio_files==None)
+	assert(fs.video_files==None)
+	assert(fs.offsets==None)
 	assert(fs.target_audio==None)
-	assert(isinstance(fs.audio_files,list))
-	assert(isinstance(fs.video_files,list))
-	assert(isinstance(fs.offsets,list))
 	cwd = os.getcwd()
 	video_files = [os.path.join(os.path.dirname(__file__), 'resources','sample1.MP4')]
 	target_audio = os.path.join(os.path.dirname(__file__), 'resources','cosan_synctune.wav')
