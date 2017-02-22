@@ -574,7 +574,8 @@ class facesync(object):
             # command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
             # command = 'ffmpeg -y -ss ' + seconds.split('.')[0] + ' -i ' + vidfile + ' -ss 00:00:00.' + seconds.split('.')[1] + ' -c copy ' + final_vidname
             command = 'ffmpeg -y -i ' + vidfile + ' -ss ' + str(seconds) + ' -crf 23 '  + final_vidname
-            subprocess.Popen(command, shell=True)
+            # subprocess.Popen(command, shell=True)
+            subprocess.call(command, shell=True)
 
 
 
