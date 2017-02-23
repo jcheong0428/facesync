@@ -35,8 +35,8 @@ def test_facesyc(tmpdir):
 	fs.find_offset_dist(search_start=15,search_end=16)
 
 	print('testing trimming method')
-	fs.trim_vids(call = False)
+	# fs.trim_vids(call = False)
 	print('testing resizing method with Popen')
-	fs.resize_vids(resolution = 32,suffix = 'test',call = False)
+	# fs.resize_vids(resolution = 32,suffix = 'test',call = False)
 
 	# add tests for video concat
