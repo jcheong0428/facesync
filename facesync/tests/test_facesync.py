@@ -1,5 +1,6 @@
 from facesync.facesync import facesync
 import os, glob
+import numpy as np
 
 def test_facesyc(tmpdir):
 	fs = facesync()
@@ -15,10 +16,27 @@ def test_facesyc(tmpdir):
 	print(glob.glob(os.path.join(os.path.dirname(__file__), 'resources','*.MP4')))
 	print(fs.audio_files)
 	assert(fs.audio_files == [os.path.join(os.path.dirname(__file__), 'resources','sample1.wav')])
-	fs.find_offset_cross()
+	
+	print('testing fft cross correlation')
+	fs.find_offset_cross(length=3,search_start=15)
+	assert(np.round(fs.offsets[0])==np.round(15.1612471655))
+
 	assert(isinstance(fs.offsets,list))
-	fs.find_offset_corr(search_start=14,search_end=16)
-	fs.find_offset_dist(search_start=14,search_end=16)
-	fs.resize_vids(resolution = 32,suffix = 'test')
+
+	print('testing correlation method')
+	fs.find_offset_corr(search_start=15,search_end=16)
+	assert(np.round(fs.offsets[0])==np.round(15.1612603317))
+
+	print('testing sparse correlation method')
+	fs.find_offset_corr_sparse(length = 1.8,search_start=15,search_end=16,sparse_ratio=.5)
+	assert(np.round(fs.offsets[0])==np.round(15.1612603317))
+
+	print('testing distance method')
+	fs.find_offset_dist(search_start=15,search_end=16)
+
+	print('testing trimming method')
+	fs.trim_vids()
+	print('testing resizing method with Popen')
+	fs.resize_vids(resolution = 32,suffix = 'test',call = False)
 
 	# add tests for video concat
