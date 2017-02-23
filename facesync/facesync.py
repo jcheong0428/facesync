@@ -16,11 +16,12 @@ import subprocess
 import scipy.io.wavfile as wav
 import math
 
-def write_offset_to_file(afile, offset, header):
+def write_offset_to_file(afile, offset, header='offset'):
     '''
     Helper function to write offset output to file.
     '''
-    fname = afile.split(".")[0] + '.txt'
+    (path2fname, fname) = os.path.split(afile)
+    fname = os.path.join(path2fname,fname.split(".")[0] + '.txt')
     f = open(fname, 'a+')
     f.write(header+'\n')
     f.write(str(offset)+'\n') 
@@ -120,7 +121,7 @@ class facesync(object):
             else:
                 subprocess.Popen(command, shell=True)
 
-    def find_offset_cross(self,length = 10,verbose=True):
+    def find_offset_cross(self,length = 10,search_start=0,verbose=True):
         ''' 
         Find offset using Fourier Transform cross correlation.
 
@@ -146,8 +147,8 @@ class facesync(object):
                 data0 = data0[:,0]
             if np.ndim(data1)>1:
                 data1 = data1[:,0]
-            x = data0[:rate0*length]
-            y = data1[:rate0*length]
+            x = data0[:rate0*length] # target audio
+            y = data1[int(search_start*rate0):int(search_start*rate0)+rate0*length] # change sample audio location
             if len(x) < len(y):
                 xnew = np.zeros_like(y)
                 xnew[:len(x)] = x
@@ -158,7 +159,7 @@ class facesync(object):
             crosscorr = fftshift(np.real(ifft(f1*f2)))
             assert(len(crosscorr)==len(x))
             zero_index = int(len(x) / 2 ) -1 
-            offset_x = (zero_index - np.argmax(crosscorr))/float(rate0)
+            offset_x = search_start+(zero_index - np.argmax(crosscorr))/float(rate0)
             self.offsets.append(offset_x)
             write_offset_to_file(afile, offset_x,header='xcorr_len'+str(length))
 
@@ -289,7 +290,7 @@ class facesync(object):
             # offset_r = ts[np.argmax(rs)] + search_start
             offset_r = ts[np.argmax(rs)]
             self.offsets.append(offset_r)
-            write_offset_to_file(afile, offset_r,header='corr_sparse_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
+            write_offset_to_file(afile, offset_r, header='corr_sparse_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allrs
 
     def find_offset_corr_multi(self,length=5,search_start=0,search_end=20,fps=44100,verbose=True):
@@ -474,6 +475,7 @@ class facesync(object):
             # command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
             # command = 'ffmpeg -y -ss ' + seconds.split('.')[0] + ' -i ' + vidfile + ' -ss 00:00:00.' + seconds.split('.')[1] + ' -c copy ' + final_vidname
             command = 'ffmpeg -y -i ' + vidfile + ' -ss ' + str(seconds) + ' -crf 23 '  + final_vidname
+            # command = 'ffmpeg -y -i ' + vidfile + ' -ss ' + str(seconds) + ' -vcodec libx264 -crf 23 -acodec copy '  + final_vidname
             if call:
                 subprocess.call(command, shell=True)
             else:
