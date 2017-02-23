@@ -24,15 +24,15 @@ def test_facesyc(tmpdir):
 	assert(isinstance(fs.offsets,list))
 
 	print('testing correlation method')
-	fs.find_offset_corr(search_start=15,search_end=16)
+	fs.find_offset_corr(search_start=15,search_end=16,fps=441)
 	assert(np.round(fs.offsets[0])==np.round(15.1612603317))
 
 	print('testing sparse correlation method')
-	fs.find_offset_corr_sparse(length = 1.8,search_start=15,search_end=16,sparse_ratio=.5)
+	fs.find_offset_corr_sparse(length = 1.8,search_start=15,search_end=16,sparse_ratio=.5,fps=441)
 	assert(np.round(fs.offsets[0])==np.round(15.1612603317))
 
 	print('testing distance method')
-	fs.find_offset_dist(search_start=15,search_end=16)
+	fs.find_offset_dist(search_start=15,search_end=16,fps=441)
 
 	print('testing trimming method')
 	# fs.trim_vids(call = False)
