@@ -14,7 +14,17 @@ import os
 import numpy as np
 import subprocess
 import scipy.io.wavfile as wav
-import math
+
+def _get_vid_resolution(vidFile):
+    """ Gets video resolution for a given file using ffprobe.
+    """
+    cmd = [
+         'ffprobe','-v','error','-of','flat=s=_','-select_streams','v:0','-show_entries','stream=height,width', vidFile
+    ]
+    proc = subprocess.Popen(cmd,stdout=subprocess.PIPE)
+    out = proc.communicate()[0]
+    out = out.split('\n')[:2]
+    return tuple([int(elem.split('=')[-1]) for elem in out])
 
 def write_offset_to_file(afile, offset, header='offset'):
     '''
@@ -24,7 +34,7 @@ def write_offset_to_file(afile, offset, header='offset'):
     fname = os.path.join(path2fname,fname.split(".")[0] + '.txt')
     f = open(fname, 'a+')
     f.write(header+'\n')
-    f.write(str(offset)+'\n') 
+    f.write(str(offset)+'\n')
     f.close()
 
 def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
@@ -49,7 +59,7 @@ def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
     ts = []
     # for i in np.linspace(0,searchtime,fps*searchtime):
     inputs = list(np.linspace(search_start,search_end,fps*searchtime))
-    
+
     ts = inputs
     allrs.append(rs)
     # offset_r = ts[np.argmax(rs)] + search_start
@@ -67,7 +77,7 @@ class facesync(object):
     Args:
         data: list of video files
         Y: Pandas DataFrame of training labels
-        X: Pandas DataFrame Design Matrix for running univariate models 
+        X: Pandas DataFrame Design Matrix for running univariate models
         mask: binary nifiti file to mask brain data
         output_file: Name to write out to nifti file
         **kwargs: Additional keyword arguments to pass to the prediction algorithm
@@ -97,15 +107,15 @@ class facesync(object):
     def extract_audio(self,rate=44100,call=True,verbose=True):
         '''
         This method extracts audio from video files in self.video_files and saves audio files in self.audio_files
-        
+
         Input
         ------------
         rate: rate of audio stream frequency to be extracted, default 44100
         call: boolean, whether to wait for each process to finish or open multiple threads
-        verbose: if True, prints the currently processing audio filename 
+        verbose: if True, prints the currently processing audio filename
         '''
         assert(len(self.video_files)!=0),'No video files to process'
-        self.audio_files = [] 
+        self.audio_files = []
         for i, vidfile in enumerate(self.video_files):
             if verbose:
                 print vidfile
@@ -122,27 +132,26 @@ class facesync(object):
                 subprocess.Popen(command, shell=True)
 
     def find_offset_cross(self,length = 10,search_start=0,verbose=True):
-        ''' 
+        '''
         Find offset using Fourier Transform cross correlation.
 
         Input
         ------------
         length: seconds to use for the cross correlation matching, default is 10 seconds
-        verbose: if True, prints the currently processing audio filename 
+        verbose: if True, prints the currently processing audio filename
         '''
         import numpy as np
-        from numpy.fft import fft, ifft, fft2, ifft2, fftshift
+        from numpy.fft import fft, ifft, fftshift
         assert(self.target_audio is not None), 'Target audio not specified'
         assert(self.audio_files is not None), 'Audio files not specified'
         self.offsets = []
-        allrs = []
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             if verbose:
                 print afile
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
-            # Take first audio channel 
+            # Take first audio channel
             if np.ndim(data0)>1:
                 data0 = data0[:,0]
             if np.ndim(data1)>1:
@@ -158,7 +167,7 @@ class facesync(object):
             f2 = fft(np.flipud(y))
             crosscorr = fftshift(np.real(ifft(f1*f2)))
             assert(len(crosscorr)==len(x))
-            zero_index = int(len(x) / 2 ) -1 
+            zero_index = int(len(x) / 2 ) -1
             offset_x = search_start+(zero_index - np.argmax(crosscorr))/float(rate0)
             self.offsets.append(offset_x)
             write_offset_to_file(afile, offset_x,header='xcorr_len'+str(length))
@@ -175,7 +184,7 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision, default 44100
-        verbose: if True, prints the currently processing audio filename 
+        verbose: if True, prints the currently processing audio filename
 
         Output
         ------------
@@ -237,7 +246,7 @@ class facesync(object):
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision, default 44100
         sparse_ratio = Determines the sparse sampling of the target audio to match (default is .5)
-        verbose: if True, prints the currently processing audio filename 
+        verbose: if True, prints the currently processing audio filename
 
         Output
         ------------
@@ -305,7 +314,7 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision, default 44100
-        verbose: if True, prints the currently processing audio filename 
+        verbose: if True, prints the currently processing audio filename
 
         Output
         ------------
@@ -340,7 +349,7 @@ class facesync(object):
         length : length of original sample to compare
         search_start, search_end: start and end times to search for alignment in seconds
         fps: level of temporal precision, default 44100
-        verbose: if True, prints the currently processing audio filename 
+        verbose: if True, prints the currently processing audio filename
 
         Output
         ------------
@@ -389,9 +398,45 @@ class facesync(object):
             write_offset_to_file(afile, offset_d,header='dist_fps'+str(fps)+'_len'+str(length)+'_start'+str(search_start)+'_end'+str(search_end))
         return allds
 
-    def concat_vids(self, final_vidname = None):
+    def resize_vids(self, resolution = 64, suffix = None,call = True, force=False):
         '''
-        Concatenate list of videos to one video. 
+        Resize videos.
+
+        Inputs
+        ------------
+        resolution: height of the video
+        suffix: what to name the resized video. If not specified, will append video names with resolution
+        call: boolean, whether to wait for each process to finish or open multiple threads,
+        True: call, False: multithread, default is call
+        force: whether to force creating new files some video files are already at the desired resolution; defaults to False
+        '''
+        if suffix == None:
+            suffix = str(resolution)
+
+        out = []
+        for vidfile in self.video_files:
+            (path2fname, vname) = os.path.split(vidfile)
+            print("Resizing video: %s" % (vname))
+            current_resolution = _get_vid_resolution(vidfile)
+            if current_resolution[1] == resolution and not force:
+                print("Native resolution already ok, skipping: %s" % (vname))
+                final_vidname = os.path.join(path2fname,vname)
+                out.append(final_vidname)
+                continue
+            else:
+                final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
+                out.append(final_vidname)
+                command = 'ffmpeg -y -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
+                if not os.path.exists(final_vidname):
+                    if call:
+                        subprocess.call(command, shell=True)
+                    else:
+                        subprocess.Popen(command, shell=True)
+        return out
+
+    def concat_vids(self, final_vidname = None, resolution_fix=False):
+        '''
+        Concatenate list of videos to one video.
 
         Inputs
         ------------
@@ -405,10 +450,25 @@ class facesync(object):
             self.final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_all.'+vname.split('.')[-1])
         assert(type(self.final_vidname)==str),'final_vidname must be a string with full path'
 
+        #Check that files are all of the same resolution
+        resolutions = [_get_vid_resolution(elem) for elem in self.video_files]
+        if len(set(resolutions)) > 1:
+            if resolution_fix:
+                min_resolution = min([elem[1] for elem in resolutions])
+                print("Videos mismatch in resolution, resizing to: %s..." % (min_resolution))
+                new_vids= self.resize_vids(resolution=min_resolution)
+                self.video_files = new_vids
+                resolutions = [_get_vid_resolution(elem) for elem in self.video_files]
+                assert(len(set(resolutions))<=1),"Videos still mismatched. Something went wrong with automatic resizing? Try resizing manually."
+                print("Resizing complete. Continuing.")
+            else:
+                raise TypeError("Video files have different resolutions!")
+
         # Create intermediate video files
         tempfiles = str();
         for i, vidfile in enumerate(self.video_files):
             (path2fname, vname) = os.path.split(vidfile)
+            print("Joining video: %s" % (vname))
             if len(tempfiles)!=0:
                 tempfiles = tempfiles+"|"
             intermediatefile = os.path.join(path2fname,"intermediate"+str(i)+'.ts')
@@ -427,43 +487,19 @@ class facesync(object):
             command = "rm -f " + intermediatefile
             subprocess.call(command, shell=True)
 
-    def resize_vids(self, resolution = 64, suffix = None,call = True):
-        '''
-        Resize videos.
-
-        Inputs
-        ------------
-        resolution: height of the video
-        suffix: what to name the resized video. If not specified, will append video names with resolution
-        call: boolean, whether to wait for each process to finish or open multiple threads, 
-        True: call, False: multithread, default is call
-        '''
-        if suffix == None: 
-            suffix = str(resolution)
-
-        for vidfile in self.video_files: 
-            (path2fname, vname) = os.path.split(vidfile)
-            final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
-            command = 'ffmpeg -y -i ' + vidfile + ' -vf scale=-1:'+str(resolution)+' '+final_vidname
-            if not os.path.exists(final_vidname):
-                if call:
-                    subprocess.call(command, shell=True)
-                else:
-                    subprocess.Popen(command, shell=True)
-
     def trim_vids(self,offsets = None, suffix = None,call=True):
         '''
         Trims video based on offset
-        
+
         Inputs
         ------------
         offsets: list of offsets to trim the self.video_files with
         length of offsets should match length of self.video_files
         suffix: string to add to end of the trimmed video, default: 'trimmed'
-        call: boolean, whether to wait for each process to finish or open multiple threads, 
+        call: boolean, whether to wait for each process to finish or open multiple threads,
         True: call, False: multithread, default is call
         '''
-        if suffix == None: 
+        if suffix == None:
             suffix = 'trimmed'
         if offsets is not None:
             self.offsets= offsets
@@ -471,6 +507,7 @@ class facesync(object):
         for i,vidfile in enumerate(self.video_files):
             seconds = str(self.offsets[i])
             (path2fname, vname) = os.path.split(vidfile)
+            print("Trimming video: %s" % (vname))
             final_vidname = os.path.join(path2fname,vname.split('.')[0]+'_'+suffix+'.'+vname.split('.')[-1])
             # command = 'ffmpeg -y -ss ' + str(seconds) + ' -i ' + vidfile + ' -c copy ' + final_vidname
             # command = 'ffmpeg -y -ss ' + seconds.split('.')[0] + ' -i ' + vidfile + ' -ss 00:00:00.' + seconds.split('.')[1] + ' -c copy ' + final_vidname
@@ -480,7 +517,3 @@ class facesync(object):
                 subprocess.call(command, shell=True)
             else:
                 subprocess.Popen(command, shell=True)
-
-
-
-
