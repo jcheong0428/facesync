@@ -1,4 +1,4 @@
-__all__ = [ 'facesync',
+__all__ = [ 'facesync','utils',
 			'__version__']
 
-from version import __version__
+from .version import __version__

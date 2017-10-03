@@ -42,7 +42,7 @@ def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
     Helper function for multiprocessing
     '''
     if verbose:
-        print afile
+        print(afile)
     rate1,data1 = wav.read(afile)
     assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
     searchtime = search_end-search_start # seconds to search alignment
@@ -54,7 +54,7 @@ def processInput(rate0,data0,afile,fps,search_start,search_end,verbose):
     try:
         assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
     except:
-        print "Original length need to be shorter or reduce searchtime to allow buffer at end."
+        print("Original length need to be shorter or reduce searchtime to allow buffer at end.")
     rs = []
     ts = []
     # for i in np.linspace(0,searchtime,fps*searchtime):
@@ -118,7 +118,7 @@ class facesync(object):
         self.audio_files = []
         for i, vidfile in enumerate(self.video_files):
             if verbose:
-                print vidfile
+                print(vidfile)
             (path2fname, vname) = os.path.split(vidfile)
             aname = vname.split(".")[0] + ".wav"
             infile = os.path.join(path2fname,vname)
@@ -148,7 +148,7 @@ class facesync(object):
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             if verbose:
-                print afile
+                print(afile)
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
             # Take first audio channel
@@ -200,7 +200,7 @@ class facesync(object):
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             if verbose:
-                print afile
+                print(afile)
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
             searchtime = search_end-search_start # seconds to search alignment
@@ -212,7 +212,7 @@ class facesync(object):
             try:
                 assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
             except:
-                print "Original length need to be shorter or reduce searchtime to allow buffer at end."
+                print("Original length need to be shorter or reduce searchtime to allow buffer at end.")
             rs = []
             ts = []
             # for i in np.linspace(0,searchtime,fps*searchtime):
@@ -262,7 +262,7 @@ class facesync(object):
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             if verbose:
-                print afile
+                print(afile)
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
             searchtime = search_end-search_start # seconds to search alignment
@@ -279,7 +279,7 @@ class facesync(object):
             try:
                 assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
             except:
-                print "Original length need to be shorter or reduce searchtime to allow buffer at end."
+                print("Original length need to be shorter or reduce searchtime to allow buffer at end.")
             rs = []
             ts = []
             # for i in np.linspace(0,searchtime,fps*searchtime):
@@ -364,7 +364,7 @@ class facesync(object):
         rate0,data0 = wav.read(self.target_audio)
         for i, afile in enumerate(self.audio_files):
             if verbose:
-                print afile
+                print(afile)
             rate1,data1 = wav.read(afile)
             assert(rate0==rate1), "Audio sampling rate is not the same for target and sample" # Check if they have same rate
             searchtime = search_end-search_start # seconds to search alignment
@@ -376,7 +376,7 @@ class facesync(object):
             try:
                 assert(data1.shape[0] - (searchtime+length)*rate0 >= 0)
             except:
-                print "Original length need to be shorter or reduce searchtime to allow buffer at end."
+                print("Original length need to be shorter or reduce searchtime to allow buffer at end.")
             ds = []
             ts = []
             # for i in np.linspace(0,searchtime,fps*searchtime):

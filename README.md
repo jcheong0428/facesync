@@ -55,3 +55,7 @@ print(fs.offsets)
 fs.find_offset_fft()
 print(fs.offsets
 ```
+
+With Python3, you can use the VideoViewer widget to play both video and data at the same time. 
+<img style="float:left;vertical-align:top;" src="/screenshots/VideoViewer.png" align="left" />
+
