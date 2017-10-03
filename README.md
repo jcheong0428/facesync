@@ -56,6 +56,9 @@ fs.find_offset_fft()
 print(fs.offsets
 ```
 
+You can manually align the audios with AudioAligner. 
+<img style="float:left;vertical-align:top;" src="/screenshots/AudioAligner.png" align="left" />
+
 With Python3, you can use the VideoViewer widget to play both video and data at the same time. 
 <img style="float:left;vertical-align:top;" src="/screenshots/VideoViewer.png" align="left" />
 
