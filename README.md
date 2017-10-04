@@ -56,6 +56,12 @@ fs.find_offset_fft()
 print(fs.offsets
 ```
 
+# FaceSync provides handy utilities for working with facial expression data.
+
+## You can plot facial landmarks and how they change as a result of Action Unit changes. 
+<img style="float:left;vertical-align:top;" src="/screenshots/plotface.png" align="left" />
+  
+
 ## You can manually align the audios with AudioAligner. 
 <img style="float:left;vertical-align:top;" src="/screenshots/AudioAligner.png" align="left" />
   
