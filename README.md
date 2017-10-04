@@ -59,14 +59,14 @@ print(fs.offsets
 # FaceSync provides handy utilities for working with facial expression data.
 
 ## You can plot facial landmarks and how they change as a result of Action Unit changes. 
-<img style="float:left;vertical-align:top;" src="/screenshots/plotface.png" align="left" />
+<img src="/screenshots/plotface.png" align="center" />
   
 
 ## You can manually align the audios with AudioAligner. 
-<img style="float:left;vertical-align:top;" src="/screenshots/AudioAligner.png" align="left" />
+<img src="/screenshots/AudioAligner.png" align="center" />
   
    
   
 ## With Python3, you can use the VideoViewer widget to play both video and data at the same time. 
-<img style="float:left;vertical-align:top;" src="/screenshots/VideoViewer.png" align="left" />
+<img src="/screenshots/VideoViewer.png" align="center" />
 
