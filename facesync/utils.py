@@ -47,7 +47,7 @@ def VideoViewer(path_to_video, data_df):
     
     fps = wid.timebase**-1 # time base is play rate hard coded at 30fps 
     
-    fig,ax = plt.subplots(1,1,figsize=(9,3)) # hardcode figure size for now..
+    fig,ax = plt.subplots(1,1,figsize=(6.5,3)) # hardcode figure size for now..
     t=wid.current_time
     ax.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
     # plot each column
