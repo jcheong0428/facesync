@@ -271,7 +271,7 @@ class facesync(object):
             if np.ndim(data1)>1:
                 data1 = data1[:,0]
             # to_compare = data0[0:rate0*length]
-            sampleix = range(0,int(rate0*length)-1)
+            sampleix = list(range(0,int(rate0*length)-1))
             np.random.shuffle(sampleix)
             sampleix = np.sort(sampleix[0:int(rate0*length*sparse_ratio)])
             to_compare = data0[sampleix]

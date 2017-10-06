@@ -73,8 +73,8 @@ def AudioAligner(original, sample, search_start=0.0,search_end=15.0, xmax = 60,m
     This function pull up an interactive console to find the offsets between two audios.
     
     Args:
-        original: path to original audio file (e.g. '../audios/Aimee.wav')
-        sample: path to the sample audio file (e.g. '../audios/Jin.wav')
+        original: path to original audio file (e.g. '../audios/original.wav')
+        sample: path to the sample audio file (e.g. '../audios/sample.wav')
         search_start(float): start range for slider to search for offset
         search_end(float): end range for slider to search for offset
         xmax(int): Range of audio to plot from beginning
@@ -87,9 +87,12 @@ def AudioAligner(original, sample, search_start=0.0,search_end=15.0, xmax = 60,m
     from ipywidgets import widgets
     
     orig_r,orig = wav.read(original)
+    # volume is often louder on original so you can reduce it
     orig = orig/reduce_orig_volume
+    # take one channel of target audio. probably not optimal
     if np.ndim(orig) >1:
         orig = orig[:,0]
+    # grab one channel of sample audio
     tomatch_r,tomatch = wav.read(sample)
     tomatch = tomatch[:,0]
 
@@ -101,10 +104,11 @@ def AudioAligner(original, sample, search_start=0.0,search_end=15.0, xmax = 60,m
         tomatchcopy = tomatch[int((allshift+offset)*tomatch_r):int((allshift+offset)*tomatch_r)+fs*samplesize]
         shape = tomatchcopy.shape[0]
         origcopy = orig[int((allshift)*tomatch_r):int((allshift)*tomatch_r)+fs*samplesize]
+        # when target audio is shorter, pad difference with zeros
         if origcopy.shape[0] < tomatchcopy.shape[0]:
             diff = tomatchcopy.shape[0] - origcopy.shape[0]
             origcopy = np.pad(origcopy, pad_width = (0,diff),mode='constant')
-        toplay = origcopy/reduce_orig_volume+tomatchcopy
+        toplay = origcopy + tomatchcopy
         display(Audio(data=toplay,rate=fs))
 
     def Plot_Audios(offset,x_min,x_max):
@@ -123,8 +127,8 @@ def AudioAligner(original, sample, search_start=0.0,search_end=15.0, xmax = 60,m
     widgets.interact(Plot_Audios,
                      offset=widgets.FloatSlider(value = 0.5*(search_start+search_end), readout_format='.3f', min = float(search_start), max = float(search_end), step = 0.001, 
                                                 description='Adjusted offset: ',layout=widgets.Layout(width='90%')),
-                     x_min=widgets.FloatSlider(description='Min X on audio plot', value=0.0,min=0.0,max=xmax,step=0.5, layout=widgets.Layout(width='50%')),
-                     x_max=widgets.FloatSlider(description='Max X on audio plot', value=xmax,min=0.0,max=xmax,step=0.5, layout=widgets.Layout(width='50%')),
+                     x_min=widgets.FloatSlider(description='Min X on audio plot', value=0.0,min=0.0,max=xmax,step=0.1, layout=widgets.Layout(width='50%')),
+                     x_max=widgets.FloatSlider(description='Max X on audio plot', value=xmax,min=0.0,max=xmax,step=0.1, layout=widgets.Layout(width='50%')),
                      __manual=manual
                     )
 neutralface = {-34: (212, 336),
