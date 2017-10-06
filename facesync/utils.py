@@ -52,7 +52,7 @@ def VideoViewer(path_to_video, data_df):
     ax.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
     # plot each column
     data_df.plot(ax=ax)
-    ax.set_xlabel('Time')
+    ax.set_xlabel('Frames')
     plt.tight_layout()
     
     def plot_dat(ax,t,fps=fps):
