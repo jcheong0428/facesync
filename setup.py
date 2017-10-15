@@ -1,7 +1,7 @@
 # from nltools.version import __version__
 from setuptools import setup, find_packages
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 # try:
 #     from setuptools.core import setup
@@ -17,7 +17,7 @@ setup(
     author='Jin Hyun Cheong',
     author_email='jcheong.gr@dartmouth.edu',
     url='https://github.com/jcheong0428/facesync',
-    download_url = 'https://github.com/jcheong0428/facesync/tarball/0.8',
+    download_url = 'https://github.com/jcheong0428/facesync/tarball/0.9',
     install_requires=['numpy', 'scipy'],
     packages=find_packages(exclude=['facesync/tests']),
     package_data={'facesync': ['resources/*']},

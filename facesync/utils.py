@@ -16,7 +16,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-def VideoViewer(path_to_video, data_df):
+def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=None):
     """
     This function plays a video and plots the data underneath the video and moves a cursor as the video plays. 
     Plays videos using Jupyter_Video_Widget by https://github.com/Who8MyLunch/Jupyter_Video_Widget 
@@ -51,8 +51,11 @@ def VideoViewer(path_to_video, data_df):
     t=wid.current_time
     ax.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
     # plot each column
-    data_df.plot(ax=ax)
+    data_df.plot(ax=ax,legend=legend,xlim=xlim,ylim=ylim)
+    ax.set_ylabel(ylabel)
     ax.set_xlabel('Frames')
+    if legend:
+        plt.legend(loc=1)
     plt.tight_layout()
     
     def plot_dat(ax,t,fps=fps):
@@ -94,7 +97,8 @@ def AudioAligner(original, sample, search_start=0.0,search_end=15.0, xmax = 60,m
         orig = orig[:,0]
     # grab one channel of sample audio
     tomatch_r,tomatch = wav.read(sample)
-    tomatch = tomatch[:,0]
+    if np.ndim(tomatch) >1:
+        tomatch = tomatch[:,0]
 
     fs = 44100
 
