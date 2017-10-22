@@ -16,7 +16,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=None):
+def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=None,plot_rows=True):
     """
     This function plays a video and plots the data underneath the video and moves a cursor as the video plays. 
     Plays videos using Jupyter_Video_Widget by https://github.com/Who8MyLunch/Jupyter_Video_Widget 
@@ -26,7 +26,11 @@ def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=No
     Args: 
         path_to_video : file path or url to a video. tested with mov and mp4 formats.
         data_df : pandas dataframe with columns to be plotted. (plotting too many column can slowdown update)
-        
+        ylabel(str): add ylabel
+        legend(bool): toggle whether to plot legend
+        xlim(list): pass xlimits [min,max]
+        ylim(list): pass ylimits [min,max]
+        plot_rows(bool): Draws individual plots for each column of data_df. (Default: True) 
     """
     from jpy_video import Video
 
@@ -46,26 +50,40 @@ def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=No
     wid.display()
     
     fps = wid.timebase**-1 # time base is play rate hard coded at 30fps 
-    
-    fig,ax = plt.subplots(1,1,figsize=(6.5,3)) # hardcode figure size for now..
+    if plot_rows:
+        fig,axs = plt.subplots(data_df.shape[1],1,figsize=(6.5,3)) # hardcode figure size for now..
+    else:
+        fig,axs = plt.subplots(1,1,figsize=(6.5,3))
     t=wid.current_time
-    ax.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
-    # plot each column
-    data_df.plot(ax=ax,legend=legend,xlim=xlim,ylim=ylim)
-    ax.set_ylabel(ylabel)
-    ax.set_xlabel('Frames')
+    if plot_rows:
+        for ixs, ax in enumerate(axs):
+            ax.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
+            # plot each column
+            data_df.iloc[:,ixs].plot(ax=ax,legend=legend,xlim=xlim,ylim=ylim)
+            ax.set(ylabel = ylabel,title=data_df.columns[ixs])
+        ax.set_xlabel('Frames')
+    else: 
+        axs.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
+        # plot each column
+        data_df.plot(ax=axs,legend=legend,xlim=xlim,ylim=ylim)
+        axs.set(ylabel = ylabel)        
     if legend:
         plt.legend(loc=1)
     plt.tight_layout()
     
-    def plot_dat(ax,t,fps=fps):
-        if ax.lines:
-            ax.lines[0].set_xdata([np.round(fps*t),np.round(fps*t)])
+    def plot_dat(axs,t,fps=fps):
+        if plot_rows:
+            for ax in axs:
+                if ax.lines:
+                    ax.lines[0].set_xdata([np.round(fps*t),np.round(fps*t)])
+        else:
+            if axs.lines:
+                axs.lines[0].set_xdata([np.round(fps*t),np.round(fps*t)])   
         fig.canvas.draw()
 
-    def on_value_change(change,ax=ax,fps=fps):
+    def on_value_change(change,ax=axs,fps=fps):
         if change['name']=='_event':
-            plot_dat(ax=ax, t=change['new']['currentTime'],fps=fps)
+            plot_dat(axs=axs, t=change['new']['currentTime'],fps=fps)
             
     #  call on_value_change that will call plotting function plot_dat whenever there is cursor update 
     wid.observe(on_value_change)
@@ -135,6 +153,7 @@ def AudioAligner(original, sample, search_start=0.0,search_end=15.0, xmax = 60,m
                      x_max=widgets.FloatSlider(description='Max X on audio plot', value=xmax,min=0.0,max=xmax,step=0.1, layout=widgets.Layout(width='50%')),
                      __manual=manual
                     )
+
 neutralface = {-34: (212, 336),
  -33: (222, 342), -32: (237, 342), -30: (203, 335), -29: (222, 335),
  -28: (237, 328), -26: (227, 288), -25: (238, 292), -19: (201, 219),
