@@ -158,6 +158,7 @@ class facesync(object):
                 data1 = data1[:,0]
             x = data0[:rate0*length] # target audio
             y = data1[int(search_start*rate0):int(search_start*rate0)+rate0*length] # change sample audio location
+            # Pad target audio with zeros if not same length.
             if len(x) < len(y):
                 xnew = np.zeros_like(y)
                 xnew[:len(x)] = x
