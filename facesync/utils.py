@@ -16,7 +16,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=None,plot_rows=True):
+def rec_to_time(vals,fps):
+    times = np.array(vals)/60./fps
+    times = [str(int(np.floor(t))).zfill(2)+':'+str(int((t-np.floor(t))*60)).zfill(2) for t in times]
+    return times
+
+def VideoViewer(path_to_video, data_df,xlabel='', ylabel='',title='',figsize=(6.5,3),legend=False,xlim=None,ylim=None,plot_rows=False):
     """
     This function plays a video and plots the data underneath the video and moves a cursor as the video plays. 
     Plays videos using Jupyter_Video_Widget by https://github.com/Who8MyLunch/Jupyter_Video_Widget 
@@ -25,7 +30,7 @@ def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=No
     
     Args: 
         path_to_video : file path or url to a video. tested with mov and mp4 formats.
-        data_df : pandas dataframe with columns to be plotted. (plotting too many column can slowdown update)
+        data_df : pandas dataframe with columns to be plotted in 30hz. (plotting too many column can slowdown update)
         ylabel(str): add ylabel
         legend(bool): toggle whether to plot legend
         xlim(list): pass xlimits [min,max]
@@ -33,9 +38,7 @@ def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=No
         plot_rows(bool): Draws individual plots for each column of data_df. (Default: True) 
     """
     from jpy_video import Video
-
     from IPython.display import display, HTML
-
     display(HTML(data="""
     <style>
         div#notebook-container    { width: 95%; }
@@ -48,31 +51,34 @@ def VideoViewer(path_to_video, data_df, ylabel='',legend=False,xlim=None,ylim=No
     wid = Video(f)
     wid.layout.width='640px'
     wid.display()
+    lnwidth = 3
     
     fps = wid.timebase**-1 # time base is play rate hard coded at 30fps 
+    print(fps)
     if plot_rows:
-        fig,axs = plt.subplots(data_df.shape[1],1,figsize=(6.5,3)) # hardcode figure size for now..
+        fig,axs = plt.subplots(data_df.shape[1],1,figsize=figsize) # hardcode figure size for now..
     else:
-        fig,axs = plt.subplots(1,1,figsize=(6.5,3))
+        fig,axs = plt.subplots(1,1,figsize=figsize)
     t=wid.current_time
-    if plot_rows:
+    if plot_rows and data_df.shape[1]>1:
         for ixs, ax in enumerate(axs):
-            ax.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
+            ax.axvline(fps*t,color='k',linestyle='--',linewidth=lnwidth) # cursor is always first of ax 
             # plot each column
             data_df.iloc[:,ixs].plot(ax=ax,legend=legend,xlim=xlim,ylim=ylim)
-            ax.set(ylabel = ylabel,title=data_df.columns[ixs])
-        ax.set_xlabel('Frames')
+            ax.set_xticks = np.arange(0,data_df.shape[0],5)
+            ax.set(ylabel =data_df.columns[ixs], xlabel=xlabel, xticklabels = rec_to_time(ax.get_xticks(),fps))
     else: 
-        axs.axvline(fps*t,color='k',linestyle='--') # cursor is always first of ax 
+        axs.axvline(fps*t,color='k',linestyle='--',linewidth=lnwidth) # cursor is always first of ax 
         # plot each column
         data_df.plot(ax=axs,legend=legend,xlim=xlim,ylim=ylim)
-        axs.set(ylabel = ylabel)        
+        axs.set_xticks = np.arange(0,data_df.shape[0],5)
+        axs.set(ylabel = data_df.columns[0],xlabel=xlabel, title=title, xticklabels = rec_to_time(axs.get_xticks(),fps))        
     if legend:
         plt.legend(loc=1)
     plt.tight_layout()
     
     def plot_dat(axs,t,fps=fps):
-        if plot_rows:
+        if plot_rows and data_df.shape[1]>1:
             for ax in axs:
                 if ax.lines:
                     ax.lines[0].set_xdata([np.round(fps*t),np.round(fps*t)])

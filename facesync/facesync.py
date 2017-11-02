@@ -139,13 +139,18 @@ class facesync(object):
         ------------
         length: seconds to use for the cross correlation matching, default is 10 seconds
         verbose: if True, prints the currently processing audio filename
+
+        Output
+        ------------
+        allrs : list of cross correlation results using fftconvolve. to retrieve the offset time need to zero index and subtract argmax.   
         '''
         import numpy as np
-        from numpy.fft import fft, ifft, fftshift
+        from scipy.signal import fftconvolve
         assert(self.target_audio is not None), 'Target audio not specified'
         assert(self.audio_files is not None), 'Audio files not specified'
         self.offsets = []
         rate0,data0 = wav.read(self.target_audio)
+        allrs = []
         for i, afile in enumerate(self.audio_files):
             if verbose:
                 print(afile)
@@ -164,15 +169,14 @@ class facesync(object):
                 xnew[:len(x)] = x
                 x = xnew
             assert(len(x)==len(y)), "Length of two samples must be the same"
-            f1 = fft(x)
-            f2 = fft(np.flipud(y))
-            crosscorr = fftshift(np.real(ifft(f1*f2)))
-            assert(len(crosscorr)==len(x))
-            zero_index = int(len(x) / 2 ) -1
+            crosscorr = fftconvolve(x,y[::-1],'full')
+            zero_index = int(len(crosscorr) / 2 ) -1
             offset_x = search_start+(zero_index - np.argmax(crosscorr))/float(rate0)
+            # assert(len(crosscorr)==len(x))
             self.offsets.append(offset_x)
             write_offset_to_file(afile, offset_x,header='xcorr_len'+str(length))
-
+            allrs.append(crosscorr)
+        return allrs
 
     def find_offset_corr(self,length=5,search_start=0,search_end=20,fps=44100,verbose=True):
         '''
