@@ -1,7 +1,10 @@
 [![Build Status](https://travis-ci.org/jcheong0428/facesync.svg?branch=master)](https://travis-ci.org/jcheong0428/facesync)
 [![Coverage Status](https://coveralls.io/repos/github/jcheong0428/facesync/badge.svg?branch=master)](https://coveralls.io/github/jcheong0428/facesync?branch=master)
 
-# FACESYNC - Python toolbox to sync videos by audio. 
+# FaceSync: Open source framework for recording facial expressions with head-mounted cameras
+
+The FaceSync toolbox provides 3D blueprints for building the head-mounted camera setup described in our [paper](https://psyarxiv.com/p5293/). The toolbox also provides functions to automatically synchronize videos based on audio, manually align audio, plot facial landmark movements, and inspect synchronized videos to graph data.   
+
 
 ## Installation 
 
@@ -58,15 +61,19 @@ print(fs.offsets
 
 # FaceSync provides handy utilities for working with facial expression data.
 
-## You can plot facial landmarks and how they change as a result of Action Unit changes. 
-<img src="/screenshots/plotface.png" align="center" />
-  
-
-## You can manually align the audios with AudioAligner. 
+## Manually align the audios with AudioAligner. 
 <img src="/screenshots/AudioAligner.png" align="center" />
   
    
+## Plot facial landmarks and how they change as a result of Action Unit changes. 
+<img src="/screenshots/plotface.png" align="center" />
   
-## With Python3, you can use the VideoViewer widget to play both video and data at the same time. 
+
+## Use the VideoViewer widget to play both video and data at the same time (only available on Python).
 <img src="/screenshots/VideoViewer.png" align="center" />
+
+# Citation
+Please cite the following paper if you use our head-mounted camera setup or the software. 
+Cheong, J. H., Brooks, S., & Chang, L. J. (2017, November 1). FaceSync: Open source framework for recording facial expressions with head-mounted cameras. Retrieved from psyarxiv.com/p5293
+
 
