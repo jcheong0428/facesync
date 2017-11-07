@@ -73,7 +73,7 @@ print(fs.offsets
 <img src="/screenshots/VideoViewer.png" align="center" />
 
 # Citation
-Please cite the following paper if you use our head-mounted camera setup or the software.   
+Please cite the following paper if you use our head-mounted camera setup or software.   
 #### Cheong, J. H., Brooks, S., & Chang, L. J. (2017, November 1). FaceSync: Open source framework for recording facial expressions with head-mounted cameras. Retrieved from psyarxiv.com/p5293
 
 
