@@ -8,13 +8,108 @@ from __future__ import division
     neutralface: points that show a face 
     ChangeAU: change AUs and return new face
 '''
-__all__ = ['VideoViewer','AudioAligner','neutralface','audict','plotface','ChangeAU']
+__all__ = ['VideoViewer','AudioAligner','neutralface','audict','plotface','ChangeAU','read_facet']
 __author__ = ["Jin Hyun Cheong"]
 __license__ = "MIT"
 
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+
+def read_facet(facetfile,fullfacet=False,demean = False,demedian=False,zscore=False,fillna=False,sampling_hz=None, target_hz=None):
+    '''
+    This function reads in an iMotions-FACET exported facial expression file. Uses downsample function from nltools. 
+    Arguments: 
+        fullfacet(def: False): If True, Action Units also provided in addition to default emotion predictions. 
+        demean(def: False): Demean data 
+        demedian(def: False): Demedian data
+        zscore(def: False): Zscore data 
+        fillna(def: False): fill null values with ffill 
+        sampling_hz & target_hz: To downsample, specify the sampling hz and target hz.
+    Returns: 
+        d: dataframe of processed facial expressions
+    
+    '''
+    import pandas as pd
+    
+    def downsample(data,sampling_freq=None, target=None, target_type='samples', method='mean'):
+        ''' Downsample pandas to a new target frequency or number of samples
+            using averaging.
+            Args:
+                data: Pandas DataFrame or Series
+                        sampling_freq:  Sampling frequency of data
+                target: downsampling target
+                        target_type: type of target can be [samples,seconds,hz]
+                method: (str) type of downsample method ['mean','median'],
+                        default: mean
+            Returns:
+                downsampled pandas object
+        '''
+
+        if not isinstance(data,(pd.DataFrame,pd.Series)):
+            raise ValueError('Data must by a pandas DataFrame or Series instance.')
+        if not (method=='median') | (method=='mean'):
+            raise ValueError("Metric must be either 'mean' or 'median' ")
+
+        if target_type is 'samples':
+            n_samples = target
+        elif target_type is 'seconds':
+            n_samples = target*sampling_freq
+        elif target_type is 'hz':
+            n_samples = sampling_freq/target
+        else:
+            raise ValueError('Make sure target_type is "samples", "seconds", '
+                            ' or "hz".')
+
+        idx = np.sort(np.repeat(np.arange(1,data.shape[0]/n_samples,1),n_samples))
+        # if data.shape[0] % n_samples:
+        if data.shape[0] > len(idx):
+            idx = np.concatenate([idx, np.repeat(idx[-1]+1,data.shape[0]-len(idx))])
+        if method=='mean':
+            return data.groupby(idx).mean().reset_index(drop=True)
+        elif method=='median':
+            return data.groupby(idx).median().reset_index(drop=True)
+    
+    d = pd.read_table(facetfile, skiprows=4, sep='\t',
+                      usecols = ['FrameTime','Joy Evidence','Anger Evidence','Surprise Evidence','Fear Evidence','Contempt Evidence',
+                      'Disgust Evidence','Sadness Evidence','Confusion Evidence','Frustration Evidence',
+                      'Neutral Evidence','Positive Evidence','Negative Evidence','AU1 Evidence','AU2 Evidence',
+                      'AU4 Evidence','AU5 Evidence','AU6 Evidence','AU7 Evidence','AU9 Evidence','AU10 Evidence',
+                      'AU12 Evidence','AU14 Evidence','AU15 Evidence','AU17 Evidence','AU18 Evidence','AU20 Evidence',
+                      'AU23 Evidence','AU24 Evidence','AU25 Evidence','AU26 Evidence','AU28 Evidence','AU43 Evidence','NoOfFaces',
+                      'Yaw Degrees', 'Pitch Degrees', 'Roll Degrees'])
+    # Choose index either FrameTime or FrameNo
+    d = d.set_index(d['FrameTime'].values/1000.0)
+    if type(fullfacet) == bool:
+        if fullfacet==True:
+            facets = ['Joy Evidence','Anger Evidence','Surprise Evidence','Fear Evidence','Contempt Evidence',
+                      'Disgust Evidence','Sadness Evidence','Confusion Evidence','Frustration Evidence',
+                      'Neutral Evidence','Positive Evidence','Negative Evidence','AU1 Evidence','AU2 Evidence',
+                      'AU4 Evidence','AU5 Evidence','AU6 Evidence','AU7 Evidence','AU9 Evidence','AU10 Evidence',
+                      'AU12 Evidence','AU14 Evidence','AU15 Evidence','AU17 Evidence','AU18 Evidence','AU20 Evidence',
+                      'AU23 Evidence','AU24 Evidence','AU25 Evidence','AU26 Evidence','AU28 Evidence','AU43 Evidence','NoOfFaces']
+        elif fullfacet == False:
+            if type(fullfacet) == bool:
+                facets = ['Joy Evidence','Anger Evidence','Surprise Evidence','Fear Evidence','Contempt Evidence',
+                      'Disgust Evidence','Sadness Evidence','Confusion Evidence','Frustration Evidence',
+                      'Neutral Evidence','Positive Evidence','Negative Evidence','NoOfFaces']
+    else:
+        facets = fullfacet
+    d = d[facets] # change datatype to float16 for less memory use
+    if zscore:
+        d = (d.ix[:,:] - d.ix[:,:].mean()) / d.ix[:,:].std(ddof=0)
+    if fillna:
+        d = d.fillna(method='ffill')
+    if demedian:
+        d = d-d.median()
+    if demean:
+        d = d-d.mean()
+    if sampling_hz and target_hz:
+        d = downsample(d,sampling_freq=sampling_hz,target=target_hz,target_type='hz')
+    return d 
+
 
 def rec_to_time(vals,fps):
     times = np.array(vals)/60./fps
