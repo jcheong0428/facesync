@@ -4,6 +4,7 @@
 *.log
 facesync/*.pyc
 /facesync/*.pyc
+*/*.pyc
 
 # iPython Notebook Caches #
 ###########################
