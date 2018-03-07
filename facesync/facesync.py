@@ -142,7 +142,7 @@ class facesync(object):
 
         Output
         ------------
-        allrs : list of cross correlation results using fftconvolve. to retrieve the offset time need to zero index and subtract argmax.   
+        allrs : list of cross correlation results using fftconvolve. to retrieve the offset time need to zero index and subtract argmax.
         '''
         import numpy as np
         from scipy.signal import fftconvolve
@@ -439,7 +439,7 @@ class facesync(object):
                         subprocess.Popen(command, shell=True)
         return out
 
-    def concat_vids(self, final_vidname = None, resolution_fix=False):
+    def concat_vids(self, final_vidname = None, resolution_fix=False, checkres=True):
         '''
         Concatenate list of videos to one video.
 
@@ -456,18 +456,19 @@ class facesync(object):
         assert(type(self.final_vidname)==str),'final_vidname must be a string with full path'
 
         #Check that files are all of the same resolution
-        resolutions = [_get_vid_resolution(elem) for elem in self.video_files]
-        if len(set(resolutions)) > 1:
-            if resolution_fix:
-                min_resolution = min([elem[1] for elem in resolutions])
-                print("Videos mismatch in resolution, resizing to: %s..." % (min_resolution))
-                new_vids= self.resize_vids(resolution=min_resolution)
-                self.video_files = new_vids
-                resolutions = [_get_vid_resolution(elem) for elem in self.video_files]
-                assert(len(set(resolutions))<=1),"Videos still mismatched. Something went wrong with automatic resizing? Try resizing manually."
-                print("Resizing complete. Continuing.")
-            else:
-                raise TypeError("Video files have different resolutions!")
+        if checkres:
+            resolutions = [_get_vid_resolution(elem) for elem in self.video_files]
+            if len(set(resolutions)) > 1:
+                if resolution_fix:
+                    min_resolution = min([elem[1] for elem in resolutions])
+                    print("Videos mismatch in resolution, resizing to: %s..." % (min_resolution))
+                    new_vids= self.resize_vids(resolution=min_resolution)
+                    self.video_files = new_vids
+                    resolutions = [_get_vid_resolution(elem) for elem in self.video_files]
+                    assert(len(set(resolutions))<=1),"Videos still mismatched. Something went wrong with automatic resizing? Try resizing manually."
+                    print("Resizing complete. Continuing.")
+                else:
+                    raise TypeError("Video files have different resolutions!")
 
         # Create intermediate video files
         tempfiles = str();

@@ -3,13 +3,14 @@
 *.pyc
 *.log
 facesync/*.pyc
+/facesync/*.pyc
 
 # iPython Notebook Caches #
 ###########################
 .ipynb_checkpoints
 Notebooks/
 Notebooks/.ipynb_checkpoints
- 
+
 # OS generated files #
 ######################
 .DS_Store
