@@ -6,9 +6,9 @@
 The FaceSync toolbox provides 3D blueprints for building the head-mounted camera setup described in our [paper](https://psyarxiv.com/p5293/). The toolbox also provides functions to automatically synchronize videos based on audio, manually align audio, plot facial landmark movements, and inspect synchronized videos to graph data.   
 
 
-## Installation 
+## Installation
 
-To install (for osx or linux) open Terminal and type 
+To install (for osx or linux) open Terminal and type
 
 `pip install facesync`
 
@@ -20,7 +20,7 @@ then in the repository folder type
 
 
 ## Dependencies
-For full functionality, FACESYNC requires [ffmpeg](https://ffmpeg.org/) and the [libav](https://libav.org/) library. 
+For full functionality, FACESYNC requires [ffmpeg](https://ffmpeg.org/) and the [libav](https://libav.org/) library.
 
 Linux
 `sudo apt-get install libav-tools`
@@ -29,45 +29,44 @@ OS X
 `brew install ffmpeg`
 `brew install libav`
 
-also requires following packages: 
-- python 2.7.x
-- numpy 
-- scipy 
+also requires following packages:
+- numpy
+- scipy
 You may also install these via `pip install -r requirements.txt`
 
-## Recommended Processing Steps 
-1. Extract Audio from Target Video 
-2. Find offset with Extracted Audio 
-3. Trim Video using Offset. 
+## Recommended Processing Steps
+1. Extract Audio from Target Video
+2. Find offset with Extracted Audio
+3. Trim Video using Offset.
 *If you need to resize your video, do so before trimming.
-Otherwise timing can be off. 
+Otherwise timing can be off.
 
 ```
 from facesync.facesync import facesync
-# change file name to include the full 
+# change file name to include the full
 video_files = ['path/to/sample1.MP4']
 target_audio = 'path/to/cosan_synctune.wav'
 # Intialize facesync class
 fs = facesync(video_files=video_files,target_audio=target_audio)
 # Extracts audio from sample1.MP4
 fs.extract_audio()
-# Find offset by correlation 
+# Find offset by correlation
 fs.find_offset_corr(search_start=14,search_end=16)
 print(fs.offsets)
-# Find offset by fast fourier transform 
+# Find offset by fast fourier transform
 fs.find_offset_fft()
 print(fs.offsets
 ```
 
 # FaceSync provides handy utilities for working with facial expression data.
 
-## Manually align the audios with AudioAligner. 
+## Manually align the audios with AudioAligner.
 <img src="/screenshots/AudioAligner.png" align="center" />
-  
-   
-## Plot facial landmarks and how they change as a result of Action Unit changes. 
+
+
+## Plot facial landmarks and how they change as a result of Action Unit changes.
 <img src="/screenshots/plotface.png" align="center" />
-  
+
 
 ## Use the VideoViewer widget to play both video and data at the same time (only available on Python).
 <img src="/screenshots/VideoViewer.png" align="center" />
@@ -75,5 +74,3 @@ print(fs.offsets
 # Citation
 Please cite the following paper if you use our head-mounted camera setup or software.   
 #### Cheong, J. H., Brooks, S., & Chang, L. J. (2017, November 1). FaceSync: Open source framework for recording facial expressions with head-mounted cameras. Retrieved from psyarxiv.com/p5293
-
-
