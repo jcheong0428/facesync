@@ -55,20 +55,38 @@ fs.find_offset_corr(search_start=14,search_end=16)
 print(fs.offsets)
 # Find offset by fast fourier transform
 fs.find_offset_fft()
-print(fs.offsets
+print(fs.offsets)
 ```
 
 # FaceSync provides handy utilities for working with facial expression data.
 
 ## Manually align the audios with AudioAligner.
+```
+%matplotlib notebook
+from facesync.utils import AudioAligner
+file_original = 'path/to/audio.wav'
+file_sample = 'path/to/sample.wav'
+AudioAligner(original=file_original, sample=file_sample)
+```
 <img src="/screenshots/AudioAligner.png" align="center" />
 
 
 ## Plot facial landmarks and how they change as a result of Action Unit changes.
+```
+%matplotlib notebook
+from facesync.utils import ChangeAU, plotface
+changed_face = ChangeAU(aulist=['AU6','AU12','AU17'], au_weight = 1.0)
+ax = plotface(changed_face)
+```
 <img src="/screenshots/plotface.png" align="center" />
 
 
 ## Use the VideoViewer widget to play both video and data at the same time (only available on Python).
+```
+import facesync.utils as utils
+%matplotlib notebook
+utils.VideoViewer(path_to_video='path/to/video.mp4', data_df = fexDataFrame)
+```
 <img src="/screenshots/VideoViewer.png" align="center" />
 
 # Citation
